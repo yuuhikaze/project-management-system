@@ -1,6 +1,8 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      network: host
     container_name: project-management-system
     ports:
       - "8000:8000"
