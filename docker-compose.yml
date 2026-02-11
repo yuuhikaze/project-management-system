@@ -5,7 +5,11 @@ services:
       network: host
     container_name: project-management-system
     ports:
-      - "8000:8000"
+      - 8000:8000
     volumes:
-      - .:/app
+      - project-management-data:/app
     restart: unless-stopped
+
+# volume managed by docker (docker vol)
+volumes:
+  project-management-data:
