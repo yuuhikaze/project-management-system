@@ -51,18 +51,34 @@ def create_project(
 def get_projects(service: ProjectService):
     return service.list()
 
+
 @router.get("/projects/{project_id}", response_model=ProjectOut)
 def get_project_by_id(service: ProjectService, project_id: str):
     return service.get(project_id=project_id)
 
+
 @router.post("/projects/{project_id}/tasks", status_code=201, response_model=TaskOut)
 def create_task(body: TaskCreate, service: TaskService, project_id: str):
-    task = service.create_task(project_id=project_id, title=body.title, task_type=body.task_type, due_date=body.due_date)
-    return TaskOut(id=task.id, project_id=task.project_id, title=task.title, status=task.status, due_date=task.due_date, priority_score=task.priority_score)
+    task = service.create_task(
+        project_id=project_id,
+        title=body.title,
+        task_type=body.task_type,
+        due_date=body.due_date,
+    )
+    return TaskOut(
+        id=task.id,
+        project_id=task.project_id,
+        title=task.title,
+        status=task.status,
+        due_date=task.due_date,
+        priority_score=task.priority_score,
+    )
+
 
 @router.get("/projects/{project_id}/tasks", response_model=TaskOut)
 def get_task_by_id(service: TaskService, project_id: str):
     return service.get_task(task_id=project_id)
+
 
 @router.delete("/tasks/{task_id}")
 def delete_task_by_id(service: TaskService, task_id: str):
