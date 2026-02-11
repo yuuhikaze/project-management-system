@@ -47,39 +47,67 @@ def create_project(
         raise to_http(e)
 
 
-@router.get("/projects", response_model=ProjectOut)
+@router.get("/projects", response_model=list[ProjectOut])
 def get_projects(service: ProjectService):
-    return service.list()
+    try:
+        projects = service.list()
+        return [ProjectOut(id=p.id, name=p.name) for p in projects]
+    except Exception as e:
+        raise to_http(e)
 
 
 @router.get("/projects/{project_id}", response_model=ProjectOut)
 def get_project_by_id(service: ProjectService, project_id: str):
-    return service.get(project_id=project_id)
+    try:
+        project = service.get(project_id=project_id)
+        return ProjectOut(id=project.id, name=project.name)
+    except Exception as e:
+        raise to_http(e)
 
 
 @router.post("/projects/{project_id}/tasks", status_code=201, response_model=TaskOut)
 def create_task(body: TaskCreate, service: TaskService, project_id: str):
-    task = service.create_task(
-        project_id=project_id,
-        title=body.title,
-        task_type=body.task_type,
-        due_date=body.due_date,
-    )
-    return TaskOut(
-        id=task.id,
-        project_id=task.project_id,
-        title=task.title,
-        status=task.status,
-        due_date=task.due_date,
-        priority_score=task.priority_score,
-    )
+    try:
+        task = service.create_task(
+            project_id=project_id,
+            title=body.title,
+            task_type=body.task_type,
+            due_date=body.due_date,
+        )
+        return TaskOut(
+            id=task.id,
+            project_id=task.project_id,
+            title=task.title,
+            status=task.status,
+            due_date=task.due_date,
+            priority_score=task.priority_score,
+        )
+    except Exception as e:
+        raise to_http(e)
 
 
-@router.get("/projects/{project_id}/tasks", response_model=TaskOut)
-def get_task_by_id(service: TaskService, project_id: str):
-    return service.get_task(task_id=project_id)
+@router.get("/projects/{project_id}/tasks", response_model=list[TaskOut])
+def get_tasks(service: TaskService, project_id: str):
+    try:
+        tasks = service.list_tasks(project_id)
+        return [
+            TaskOut(
+                id=t.id,
+                project_id=t.project_id,
+                title=t.title,
+                status=t.status,
+                due_date=t.due_date,
+                priority_score=t.priority_score,
+            )
+            for t in tasks
+        ]
+    except Exception as e:
+        raise to_http(e)
 
 
-@router.delete("/tasks/{task_id}")
+@router.delete("/tasks/{task_id}", status_code=204)
 def delete_task_by_id(service: TaskService, task_id: str):
-    service.delete_task(task_id)
+    try:
+        service.delete_task(task_id)
+    except Exception as e:
+        raise to_http(e)
