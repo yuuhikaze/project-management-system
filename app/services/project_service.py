@@ -1,10 +1,11 @@
 from app.domain.entities import Project
 from app.repositories.base import ProjectRepository
 
+
 class ProjectService:
     def __init__(self, repo: ProjectRepository) -> None:
         self.repo = repo
-    
+
     def create(self, name: str) -> Project:
         project = Project(name=name)
         self.repo.add(project)
@@ -15,3 +16,4 @@ class ProjectService:
 
     def list(self) -> list[Project]:
         return self.repo.list()
+
