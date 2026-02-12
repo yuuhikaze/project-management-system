@@ -4,12 +4,26 @@ services:
       context: .
       network: host
     container_name: project-management-system
+    environment:
+      - REPO_BACKEND=postgres
+      # ODBC URL
+      - DB_URL=posgresql://root:root@project-management-system:5432/project-management
     ports:
       - 8000:8000
-    volumes:
-      - project-management-data:/app
     restart: unless-stopped
 
-# volume managed by docker (docker vol)
+  db:
+    image: postgres:16
+    container_name: project-management-system-db
+    environment:
+      POSTGRES_DB: project-management
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5432:5432
+    volumes:
+      - pm-data:/var/lib/postgresql
+
+      # volume managed by docker (docker vol)
 volumes:
-  project-management-data:
+  pm-data:

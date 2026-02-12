@@ -48,7 +48,7 @@ def create_project(
 
 
 @router.get("/projects", response_model=list[ProjectOut])
-def get_projects(service: ProjectService):
+def get_projects(service: ProjectService = Depends(get_project_service)):
     try:
         projects = service.list()
         return [ProjectOut(id=p.id, name=p.name) for p in projects]
@@ -57,7 +57,7 @@ def get_projects(service: ProjectService):
 
 
 @router.get("/projects/{project_id}", response_model=ProjectOut)
-def get_project_by_id(service: ProjectService, project_id: str):
+def get_project_by_id(project_id: str, service: ProjectService = Depends(get_project_service)):
     try:
         project = service.get(project_id=project_id)
         return ProjectOut(id=project.id, name=project.name)
@@ -66,7 +66,7 @@ def get_project_by_id(service: ProjectService, project_id: str):
 
 
 @router.post("/projects/{project_id}/tasks", status_code=201, response_model=TaskOut)
-def create_task(body: TaskCreate, service: TaskService, project_id: str):
+def create_task(body: TaskCreate, project_id: str, service: TaskService = Depends(get_task_service)):
     try:
         task = service.create_task(
             project_id=project_id,
@@ -87,7 +87,7 @@ def create_task(body: TaskCreate, service: TaskService, project_id: str):
 
 
 @router.get("/projects/{project_id}/tasks", response_model=list[TaskOut])
-def get_tasks(service: TaskService, project_id: str):
+def get_tasks(project_id: str, service: TaskService = Depends(get_task_service)):
     try:
         tasks = service.list_tasks(project_id)
         return [
@@ -106,8 +106,23 @@ def get_tasks(service: TaskService, project_id: str):
 
 
 @router.delete("/tasks/{task_id}", status_code=204)
-def delete_task_by_id(service: TaskService, task_id: str):
+def delete_task_by_id(task_id: str, service: TaskService = Depends(get_task_service)):
     try:
         service.delete_task(task_id)
+    except Exception as e:
+        raise to_http(e)
+
+@router.patch('/tasks/{task_id}', response_model=TaskOut)
+def update_tasks(task_id: str, body: TaskUpdate, service: TaskService = Depends(get_task_service)):
+    try:
+        task = service.update_task(task_id, body.title, body.due_date, body.status)
+        return TaskOut(
+            id=task.id,
+            project_id=task.project_id,
+            title=task.title,
+            status=task.status,
+            due_date=task.due_date,
+            priority_score=task.priority_score,
+        )
     except Exception as e:
         raise to_http(e)
